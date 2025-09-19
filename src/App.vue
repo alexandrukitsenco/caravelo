@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import Button from 'primevue/button';
+import QuotaFormDialog from './components/QuotaFormDialog.vue';
 </script>
 
 <template>
   <h1>Caravelo</h1>
-  <Button label="Click" />
+  <QuotaFormDialog />
 </template>
 
 <style scoped></style>
