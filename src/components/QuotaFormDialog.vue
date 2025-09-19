@@ -2,15 +2,20 @@
 import { ref, computed, watch } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required, not, sameAs } from '@vuelidate/validators';
-import { useFlightsStore } from '../stores/flights';
+import { useUsersFlightsStore, type User } from '../stores/usersFlights';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
 
 
-const flightsStore = useFlightsStore();
+const usersFlightsStore = useUsersFlightsStore();
 
-const dialog = ref(false);
+const props = defineProps<{
+    user: User;
+}>();
+
+const dialog = defineModel<boolean>('dialog', { required: true });
+
 const numberFlights = ref(0);
 const reason = ref();
 
@@ -23,6 +28,22 @@ const rules = computed(() => ({
         required
     }
 }));
+
+
+const isAddingQuota = computed(() => numberFlights.value > 0);
+const isRemovingQuota = computed(() => numberFlights.value < 0);
+
+const addButtonEnabled = computed(() => numberFlights.value < 3);
+const removeButtonEnabled = computed(() => numberFlights.value + props.user.flights > 0);
+
+const reasonOptions = computed(() => {
+    if (isAddingQuota.value) {
+        return addQuotaReasons;
+    } else if (isRemovingQuota.value) {
+        return removeQuotaReasons;
+    }
+    return [];
+});
 
 const v$ = useVuelidate(rules, { numberFlights, reason });
 
@@ -41,23 +62,13 @@ const removeQuotaReasons = [
     { label: 'Other', value: 'other_remove' }
 ];
 
-const isAddingQuota = computed(() => numberFlights.value > 0);
-const isRemovingQuota = computed(() => numberFlights.value < 0);
-
-const addButtonEnabled = computed(() => numberFlights.value < 3);
-
-const reasonOptions = computed(() => {
-    if (isAddingQuota.value) {
-        return addQuotaReasons;
-    } else if (isRemovingQuota.value) {
-        return removeQuotaReasons;
+const handleSubmit = async () => {
+    const isFormCorrect = await v$.value.$validate();
+    if (isFormCorrect) {
+        usersFlightsStore.updateUserFlights(props.user, numberFlights.value);
+        dialog.value = false;
     }
-    return [];
-});
-
-const openDialog = () => {
-    dialog.value = true;
-}
+};
 
 watch(numberFlights, () => {
     if (numberFlights.value === 0) {
@@ -72,27 +83,24 @@ watch(dialog, () => {
     }
 });
 
-const handleSubmit = async () => {
-    const isFormCorrect = await v$.value.$validate();
-    if (isFormCorrect) {
-        flightsStore.patchFlights(numberFlights.value);
-        dialog.value = false;
-    }
-};
+
 
 </script>
 
 <template>
-    <Button label="Edit Flights" icon="pi pi-pencil" @click="openDialog" />
-    <Dialog v-model:visible="dialog" :modal="true">
+    <Dialog v-model:visible="dialog" :modal="true" @hide="dialog = false">
         <template #header>
             <h3 class="text-lg font-medium">Flights Form</h3>
         </template>
         <div class="flex flex-col gap-6 w-3xs">
+            <div>
+                <h3 class="text-lg font-medium">User: {{ props.user.name }}</h3>
+                <p class="text-sm text-gray-500">Flights: {{ props.user.flights }}</p>
+            </div>
             <div class="flex flex-col gap-2">
                 <label class="text-sm font-medium">Number of flights:</label>
                 <div class="flex flex-row justify-between items-center w-full">
-                    <Button @click="numberFlights--" rounded text icon="pi pi-minus" />
+                    <Button @click="numberFlights--" rounded text icon="pi pi-minus" :disabled="!removeButtonEnabled" />
                     <span class="text-xl font-medium">{{ numberFlights }}</span>
                     <Button @click="numberFlights++" rounded text icon="pi pi-plus" :disabled="!addButtonEnabled" />
                 </div>
