@@ -111,7 +111,7 @@ watch(dialog, () => {
                 <Select v-model="reason" :options="reasonOptions" optionLabel="label" optionValue="value" class="w-full"
                     placeholder="Select a reason" :disabled="reasonOptions.length === 0" />
                 <small v-if="numberFlights === 0" class="text-gray-500">
-                    Add of Decrease flights to see the available reason options
+                    Add or Decrease flights to see the available reason options
                 </small>
             </div>
         </div>
