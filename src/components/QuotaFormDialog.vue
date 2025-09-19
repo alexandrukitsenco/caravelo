@@ -2,10 +2,13 @@
 import { ref, computed, watch } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required, not, sameAs } from '@vuelidate/validators';
+import { useFlightsStore } from '../stores/flights';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
 
+
+const flightsStore = useFlightsStore();
 
 const dialog = ref(false);
 const numberFlights = ref(0);
@@ -41,6 +44,8 @@ const removeQuotaReasons = [
 const isAddingQuota = computed(() => numberFlights.value > 0);
 const isRemovingQuota = computed(() => numberFlights.value < 0);
 
+const addButtonEnabled = computed(() => numberFlights.value < 3);
+
 const reasonOptions = computed(() => {
     if (isAddingQuota.value) {
         return addQuotaReasons;
@@ -70,8 +75,7 @@ watch(dialog, () => {
 const handleSubmit = async () => {
     const isFormCorrect = await v$.value.$validate();
     if (isFormCorrect) {
-
-
+        flightsStore.patchFlights(numberFlights.value);
         dialog.value = false;
     }
 };
@@ -90,7 +94,7 @@ const handleSubmit = async () => {
                 <div class="flex flex-row justify-between items-center w-full">
                     <Button @click="numberFlights--" rounded text icon="pi pi-minus" />
                     <span class="text-xl font-medium">{{ numberFlights }}</span>
-                    <Button @click="numberFlights++" rounded text icon="pi pi-plus" />
+                    <Button @click="numberFlights++" rounded text icon="pi pi-plus" :disabled="!addButtonEnabled" />
                 </div>
             </div>
 
