@@ -22,7 +22,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <QuotaFormDialog v-if="editedUser" :user="editedUser!" v-model:dialog="dialog" />
+  <QuotaFormDialog v-if="editedUser" :user="editedUser" v-model:dialog="dialog" />
   <Toast />
   <div class="w-full h-screen flex flex-col justify-center items-center gap-4">
     <DataTable :value="usersFlightsStore.users" :paginator="true" :rows="10" :rowsPerPageOptions="[10, 20, 50]"
