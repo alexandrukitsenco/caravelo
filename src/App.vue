@@ -24,9 +24,9 @@ onMounted(() => {
 <template>
   <QuotaFormDialog v-if="editedUser" :user="editedUser" v-model:dialog="dialog" />
   <Toast />
-  <div class="w-full h-screen flex flex-col justify-center items-center gap-4">
-    <DataTable :value="usersFlightsStore.users" :paginator="true" :rows="10" :rowsPerPageOptions="[10, 20, 50]"
-      :totalRecords="usersFlightsStore.users.length">
+  <div class="w-full p-10 flex flex-col justify-center items-center gap-4">
+    <DataTable class="w-full" :value="usersFlightsStore.users" :paginator="true" :rows="10"
+      :rowsPerPageOptions="[10, 20, 50]" :totalRecords="usersFlightsStore.users.length" scrollable scrollHeight="400px">
       <Column field="name" header="Name" />
       <Column field="email" header="Email" />
       <Column field="flights" header="Flights" />
